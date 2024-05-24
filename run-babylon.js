@@ -3,8 +3,9 @@ const path = require('path');
 
 (async () => {
   const browser = await puppeteer.launch({
-    headless: true, // Run in headless mode
-    args: ['--no-sandbox', '--disable-setuid-sandbox'] // Required in some environments
+    executablePath: '/usr/bin/google-chrome',
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
   const page = await browser.newPage();
 
@@ -13,6 +14,12 @@ const path = require('path');
 
   // Load the HTML file
   await page.goto(fileUrl);
+
+  // Wait for a certain amount of time to allow for rendering
+  await page.waitForTimeout(3000); // Adjust the delay as needed
+
+  // Optionally, take a screenshot to visually inspect the rendered page
+  await page.screenshot({ path: 'rendered_page.png' });
 
   // Define the duration to run the script (in milliseconds)
   const duration = 5 * 60 * 1000; // 5 minutes
