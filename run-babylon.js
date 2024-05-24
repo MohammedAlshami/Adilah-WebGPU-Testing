@@ -4,6 +4,7 @@ const path = require('path');
 (async () => {
   const browser = await puppeteer.launch({
     executablePath: '/usr/bin/google-chrome',
+
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
@@ -16,7 +17,7 @@ const path = require('path');
   await page.goto(fileUrl);
 
   // Wait for a certain amount of time to allow for rendering
-  await page.waitForTimeout(3000); // Adjust the delay as needed
+  await new Promise(resolve => setTimeout(resolve, 3000)); // Adjust the delay as needed
 
   // Optionally, take a screenshot to visually inspect the rendered page
   await page.screenshot({ path: 'rendered_page.png' });
