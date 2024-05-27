@@ -1,45 +1,35 @@
 const puppeteer = require('puppeteer');
-const path = require('path');
 
-(async () => {
-  const browser = await puppeteer.launch({
-    executablePath: '/usr/bin/google-chrome',
+async function renderHTMLInBackground(htmlFileURL, duration, interval) {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    
+    // Navigate to HTML file URL
+    await page.goto(htmlFileURL);
 
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
-  const page = await browser.newPage();
+    // Define the start time
+    const startTime = Date.now();
 
-  // Construct the file URL
-  const fileUrl = 'file://' + path.resolve(__dirname, '1000x.html');
+    // Loop until the duration is reached
+    while (Date.now() - startTime < duration) {
+        // Measure memory usage
+        const memoryInfo = await page.metrics();
+        console.log('JS Heap Used Size:', memoryInfo['JSHeapUsedSize'] / 1024 / 1024, 'MB');
 
-  // Load the HTML file
-  await page.goto(fileUrl);
+        // Wait for the specified interval before the next measurement
+        await new Promise(resolve => setTimeout(resolve, interval));
+    }
 
-  // Wait for a certain amount of time to allow for rendering
-  await new Promise(resolve => setTimeout(resolve, 3000)); // Adjust the delay as needed
+    // Close the browser
+    await browser.close();
+}
 
-  // Optionally, take a screenshot to visually inspect the rendered page
-  await page.screenshot({ path: 'rendered_page.png' });
+// Define the parameters
+const htmlFileURL = 'C:\\Users\\USER\\Desktop\\Adilah\\babylon-performance\\1000x.html'; // Change to the path of your HTML file
+const duration = 60000; // Duration in milliseconds (e.g., 1 minute)
+const interval = 100; // Interval between measurements in milliseconds (e.g., 5 seconds)
 
-  // Define the duration to run the script (in milliseconds)
-  const duration = 5 * 60 * 1000; // 5 minutes
-
-  // Define the interval between measurements (in milliseconds)
-  const interval = 100; // 5 seconds
-
-  const startTime = Date.now();
-
-  // Loop until the duration is reached
-  while (Date.now() - startTime < duration) {
-    // Measure GPU usage
-    const gpuInfo = await page.metrics();
-    console.log('GPU Memory Usage:', gpuInfo['JSHeapUsedSize'] / 1024 / 1024, 'MB');
-    console.log('GPU Texture Memory Usage:', gpuInfo['MallocedTextureMemory'] / 1024 / 1024, 'MB');
-
-    // Wait for the specified interval before the next measurement
-    await new Promise(resolve => setTimeout(resolve, interval));
-  }
-
-  await browser.close();
-})();
+// Call the function
+renderHTMLInBackground(htmlFileURL, duration, interval)
+    .then(() => console.log('Memory usage recorded successfully.'))
+    .catch(error => console.error('Error recording memory usage:', error));
